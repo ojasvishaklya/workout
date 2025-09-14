@@ -62,7 +62,6 @@ body {
 
 /* Main content area */
 .main-content {
-  margin-top: 72px;
   padding: 16px;
   flex: 1 1 auto;
   overflow-y: auto;
@@ -184,7 +183,7 @@ body {
 }
 
 .exercise-body {
-  padding: 12px 12px;
+  padding: 12px 20px;
 }
 
 /* Set Input - Android Style */
