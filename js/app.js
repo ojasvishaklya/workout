@@ -208,10 +208,18 @@ function loadExercises() {
     const hasLastData = exerciseData && exerciseData.sets && exerciseData.sets.some(set => set.weight > 0 || set.reps > 0);
     const lastDataIndicator = hasLastData ? '<small class="text-primary"><i class="bi bi-clock-history"></i> Previous data loaded</small>' : '';
     
+    // Generate muscle group pills
+    const musclePills = ex.muscles ? ex.muscles.map(muscle => 
+      `<span class="muscle-pill">${muscle}</span>`
+    ).join('') : '';
+    
     card.innerHTML = `
       <div class="exercise-header">
-        ${ex.name}
-        ${lastDataIndicator}
+        <div class="exercise-title">
+          ${ex.name}
+          ${lastDataIndicator}
+        </div>
+        ${musclePills ? `<div class="muscle-groups">${musclePills}</div>` : ''}
       </div>
       <div class="exercise-body">
         <div class="exercise-sets" data-exercise="${index}">
