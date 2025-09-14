@@ -1,69 +1,481 @@
-/* Main Styles */
+/* Android App-like Mobile Design */
+:root {
+  --primary-color: #1976d2;
+  --primary-dark: #1565c0;
+  --secondary-color: #03dac6;
+  --surface-color: #ffffff;
+  --background-color: #f5f5f5;
+  --on-surface: #212121;
+  --on-surface-variant: #757575;
+  --outline: #e0e0e0;
+  --success-color: #4caf50;
+  --error-color: #f44336;
+  --shadow: 0 2px 8px rgba(0,0,0,0.12);
+  --shadow-elevated: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body { 
-  background: #f8f9fa; 
-  padding-bottom: 2rem;
+  background: var(--background-color);
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--on-surface);
+  overflow-x: hidden;
 }
 
-.container { 
-  margin-top: 20px; 
+/* Mobile-first container */
+.container {
   max-width: 100%;
-  padding: 0 15px;
+  padding: 0;
+  margin: 0;
 }
 
-@media (min-width: 768px) {
-  .container {
-    max-width: 720px;
-  }
+/* Header/App Bar */
+.app-header {
+  background: var(--primary-color);
+  color: white;
+  padding: 16px 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: var(--shadow);
 }
 
-/* Exercise Input Styles */
+.app-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Main content area */
+.main-content {
+  margin-top: 72px;
+  padding: 16px;
+  padding-bottom: 80px; /* Space for bottom nav only */
+}
+
+/* Sticky Action Bar */
+.sticky-action-bar {
+  position: sticky;
+  top: 72px; /* Below the app header */
+  background: var(--surface-color);
+  padding: 12px 16px;
+  margin: -16px -16px 16px -16px; /* Extend to edges */
+  box-shadow: var(--shadow);
+  border-bottom: 1px solid var(--outline);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Timer Section */
+.timer-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.timer-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary-color);
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.timer-display i {
+  font-size: 18px;
+}
+
+.btn-timer {
+  background: none;
+  border: 1px solid var(--primary-color);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-timer:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+.btn-timer.active {
+  background: var(--success-color);
+  border-color: var(--success-color);
+  color: white;
+}
+
+/* Update save button for sticky bar */
+.sticky-action-bar .btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  min-height: 36px;
+  flex-shrink: 0;
+}
+
+/* Day Selector - Material Design */
+.day-selector {
+  margin-bottom: 16px;
+}
+
+.form-select {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid var(--outline);
+  border-radius: 8px;
+  background: var(--surface-color);
+  font-size: 16px;
+  color: var(--on-surface);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+/* Exercise Cards - Material Design */
+.exercise-card {
+  background: var(--surface-color);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  border: none;
+}
+
+.exercise-header {
+  background: var(--primary-color);
+  color: white;
+  padding: 16px 20px;
+  font-weight: 500;
+  font-size: 16px;
+  margin: 0;
+}
+
+.exercise-body {
+  padding: 16px 20px;
+}
+
+/* Set Input - Android Style */
 .set-input {
   display: flex;
-  margin-bottom: 8px;
   align-items: center;
+  margin-bottom: 12px;
+  padding: 8px 0;
 }
 
 .set-input span {
   width: 60px;
-  text-align: left;
-  margin-right: 5px;
+  font-weight: 500;
+  color: var(--on-surface-variant);
+  font-size: 14px;
 }
 
 .set-input input {
-  width: 70px;
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid var(--outline);
+  border-radius: 8px;
+  background: var(--surface-color);
+  font-size: 16px;
   margin-right: 8px;
+  transition: border-color 0.2s;
 }
 
-/* Card and UI Elements */
-.card {
-  margin-bottom: 15px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.set-input input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
 }
 
-.card-header {
-  background-color: #f1f5f9;
+.set-input input::placeholder {
+  color: var(--on-surface-variant);
 }
 
-.sticky-top {
-  top: 10px;
-  z-index: 1020;
-}
-
-.log-item {
+/* Buttons - Material Design */
+.btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
 }
 
-.exercise-title {
-  font-weight: bold;
-  margin-bottom: 8px;
+.btn-primary {
+  background: var(--primary-color);
+  color: white;
+  box-shadow: var(--shadow);
 }
 
-.btn-group-sm .btn {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
+.btn-primary:hover {
+  background: var(--primary-dark);
+  box-shadow: var(--shadow-elevated);
+}
+
+.btn-success {
+  background: var(--success-color);
+  color: white;
+  box-shadow: var(--shadow);
+}
+
+.btn-success:hover {
+  background: #45a049;
+  box-shadow: var(--shadow-elevated);
+}
+
+.btn-secondary {
+  background: var(--outline);
+  color: var(--on-surface);
+}
+
+.btn-outline-primary {
+  background: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+}
+
+.btn-outline-danger {
+  background: transparent;
+  color: var(--error-color);
+  border: 1px solid var(--error-color);
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 12px;
+  min-height: 36px;
+}
+
+/* Action buttons container */
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* Floating Action Button */
+.fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--secondary-color);
+  color: var(--on-surface);
+  border: none;
+  box-shadow: var(--shadow-elevated);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  z-index: 1001;
+}
+
+/* Logs Section */
+.logs-section {
+  margin-top: 16px;
+}
+
+.logs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.logs-header h4 {
+  margin: 0;
+  color: var(--on-surface);
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* Accordion/Workout Logs */
+.accordion-item {
+  background: var(--surface-color);
+  border: none;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.accordion-button {
+  background: var(--surface-color);
+  border: none;
+  padding: 16px 20px;
+  color: var(--on-surface);
+  font-weight: 500;
+  border-radius: 12px;
+}
+
+.accordion-button:not(.collapsed) {
+  background: var(--surface-color);
+  color: var(--primary-color);
+  box-shadow: none;
+}
+
+.accordion-button:focus {
+  box-shadow: none;
+  border: none;
+}
+
+.accordion-body {
+  background: var(--surface-color);
+  border-top: 1px solid var(--outline);
 }
 
 .workout-date {
-  font-size: 0.9rem;
-  color: #6c757d;
+  font-size: 12px;
+  color: var(--on-surface-variant);
+  font-weight: 400;
+}
+
+.exercise-title {
+  font-weight: 500;
+  color: var(--on-surface);
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.sets-list {
+  margin-left: 16px;
+}
+
+.sets-list .small {
+  color: var(--on-surface-variant);
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--surface-color);
+  border-top: 1px solid var(--outline);
+  padding: 8px 0;
+  display: flex;
+  justify-content: space-around;
+  z-index: 998;
+  height: 64px; /* Fixed height for consistent spacing */
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  color: var(--on-surface-variant);
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.nav-item.active {
+  color: var(--primary-color);
+}
+
+.nav-item i {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+/* Dropdown menu styling */
+.dropdown-menu {
+  border: none;
+  box-shadow: var(--shadow-elevated);
+  border-radius: 12px;
+  padding: 8px 0;
+  margin-top: 8px;
+}
+
+.dropdown-item {
+  padding: 12px 20px;
+  font-size: 14px;
+  color: var(--on-surface);
+}
+
+.dropdown-item:hover {
+  background: var(--background-color);
+  color: var(--on-surface);
+}
+
+/* Alert styling */
+.alert {
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.alert-info {
+  background: rgba(25, 118, 210, 0.1);
+  color: var(--primary-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .main-content {
+    padding: 12px;
+  }
+  
+  .floating-controls {
+    padding: 12px 16px;
+  }
+  
+  .exercise-header,
+  .exercise-body {
+    padding: 12px 16px;
+  }
+  
+  .accordion-button {
+    padding: 12px 16px;
+  }
+  
+  .set-input input {
+    padding: 10px 12px;
+  }
 }

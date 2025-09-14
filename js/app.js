@@ -9,13 +9,30 @@
 const daySelect = document.getElementById("daySelect");
 const exerciseList = document.getElementById("exerciseList");
 const saveBtn = document.getElementById("saveBtn");
-const viewLogsBtn = document.getElementById("viewLogsBtn");
 const logList = document.getElementById("logList");
 const logsSection = document.getElementById("logsSection");
 const exportBtn = document.getElementById("exportBtn");
 const importBtn = document.getElementById("importBtn");
 const importFile = document.getElementById("importFile");
 const clearBtn = document.getElementById("clearBtn");
+
+// Navigation elements
+const workoutTab = document.getElementById("workoutTab");
+const historyTab = document.getElementById("historyTab");
+const moreTab = document.getElementById("moreTab");
+const moreMenu = document.getElementById("moreMenu");
+const mainContent = document.querySelector(".main-content");
+
+// Timer elements
+const stickyActionBar = document.getElementById("stickyActionBar");
+const workoutTimer = document.getElementById("workoutTimer");
+const timerToggle = document.getElementById("timerToggle");
+
+// Timer state
+let timerStartTime = null;
+let timerInterval = null;
+let isTimerRunning = false;
+let totalElapsedTime = 0;
 
 // Get the current routine from the loaded routines.js
 const currentRoutineId = defaultRoutine;
@@ -56,11 +73,25 @@ function populateDaySelector() {
 function setupEventListeners() {
   daySelect.addEventListener("change", loadExercises);
   saveBtn.addEventListener("click", saveWorkout);
-  viewLogsBtn.addEventListener("click", toggleLogs);
   exportBtn.addEventListener("click", exportData);
   importBtn.addEventListener("click", () => importFile.click());
   importFile.addEventListener("change", importData);
   clearBtn.addEventListener("click", clearData);
+  
+  // Navigation listeners
+  workoutTab.addEventListener("click", showWorkoutView);
+  historyTab.addEventListener("click", showHistoryView);
+  moreTab.addEventListener("click", toggleMoreMenu);
+  
+  // Timer listeners
+  timerToggle.addEventListener("click", toggleTimer);
+  
+  // Close more menu when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!moreTab.contains(e.target) && !moreMenu.contains(e.target)) {
+      moreMenu.style.display = "none";
+    }
+  });
 }
 
 /**
@@ -69,20 +100,32 @@ function setupEventListeners() {
 function loadExercises() {
   const day = daySelect.value;
   exerciseList.innerHTML = "";
-  if (!day) return;
+  
+  if (!day) {
+    // Hide sticky action bar when no day is selected
+    stickyActionBar.style.display = "none";
+    resetTimer();
+    return;
+  }
 
-  // Hide logs view when selecting a new workout
-  logsSection.style.display = "none";
+  // Show workout view when exercises are loaded
+  showWorkoutView();
+  
+  // Show sticky action bar
+  stickyActionBar.style.display = "flex";
+  
+  // Reset timer for new workout
+  resetTimer();
 
-  // Create exercise cards
+  // Create exercise cards with new styling
   routine[day].forEach((ex, index) => {
     const card = document.createElement("div");
-    card.classList.add("card", "mb-3");
+    card.classList.add("exercise-card");
     card.innerHTML = `
-      <div class="card-header py-2">
-        <strong>${ex.name}</strong>
+      <div class="exercise-header">
+        ${ex.name}
       </div>
-      <div class="card-body p-3">
+      <div class="exercise-body">
         <div class="exercise-sets" data-exercise="${index}">
           ${generateSetInputs(ex.sets, index)}
         </div>
@@ -127,6 +170,7 @@ function saveWorkout() {
     displayDate: new Date().toLocaleDateString(),
     day,
     routine: currentRoutineId,
+    duration: getWorkoutDuration(), // Add workout duration
     exercises: []
   };
 
@@ -171,15 +215,17 @@ function saveWorkout() {
   localStorage.setItem("workoutLogs", JSON.stringify(logs));
 
   // Show success message with more details
-  alert(`Workout saved successfully!\n\nDay: ${day}\nDate: ${new Date().toLocaleDateString()}\n\nYou can view your saved workouts by clicking the "View Logs" button.`);
+  const duration = getWorkoutDuration();
+  alert(`Workout saved successfully!\n\nDay: ${day}\nDate: ${new Date().toLocaleDateString()}\nDuration: ${duration} minutes\n\nView your saved workouts in the History tab.`);
   
-  // Reset the form
+  // Reset the form and timer
   exerciseList.innerHTML = "";
   daySelect.value = "";
+  stickyActionBar.style.display = "none";
+  resetTimer();
   
-  // Open the logs to show the saved workout
-  logsSection.style.display = "block";
-  displayLogs();
+  // Switch to history view to show the saved workout
+  showHistoryView();
 }
 
 /**
@@ -187,13 +233,74 @@ function saveWorkout() {
  */
 function toggleLogs() {
   if (logsSection.style.display === "none") {
-    displayLogs();
-    logsSection.style.display = "block";
-    exerciseList.innerHTML = "";
-    daySelect.value = "";
+    showHistoryView();
   } else {
-    logsSection.style.display = "none";
+    showWorkoutView();
   }
+}
+
+/**
+ * Show workout view (main tab)
+ */
+function showWorkoutView() {
+  // Update navigation
+  setActiveTab(workoutTab);
+  
+  // Show/hide sections
+  logsSection.style.display = "none";
+  
+  // Show day selector
+  daySelect.parentElement.style.display = "block";
+  
+  // Show sticky action bar if day is selected
+  if (daySelect.value) {
+    stickyActionBar.style.display = "flex";
+  }
+  
+  // Close more menu
+  moreMenu.style.display = "none";
+}
+
+/**
+ * Show history view
+ */
+function showHistoryView() {
+  // Update navigation
+  setActiveTab(historyTab);
+  
+  // Show/hide sections
+  logsSection.style.display = "block";
+  stickyActionBar.style.display = "none";
+  
+  // Hide day selector
+  daySelect.parentElement.style.display = "none";
+  
+  // Load logs
+  displayLogs();
+  
+  // Close more menu
+  moreMenu.style.display = "none";
+}
+
+/**
+ * Toggle more menu
+ */
+function toggleMoreMenu() {
+  const isVisible = moreMenu.style.display === "block";
+  moreMenu.style.display = isVisible ? "none" : "block";
+}
+
+/**
+ * Set active navigation tab
+ */
+function setActiveTab(activeTab) {
+  // Remove active class from all tabs
+  [workoutTab, historyTab, moreTab].forEach(tab => {
+    tab.classList.remove("active");
+  });
+  
+  // Add active class to selected tab
+  activeTab.classList.add("active");
 }
 
 /**
@@ -250,15 +357,20 @@ function generateLogDetails(log) {
   
   // Add action buttons at the top
   details += `
-    <div class="d-flex justify-content-end mb-3">
-      <button class="btn btn-sm btn-outline-primary me-2" onclick="editWorkout('${log.id}')">
+    <div class="action-buttons">
+      <button class="btn btn-outline-primary btn-sm" onclick="editWorkout('${log.id}')">
         <i class="bi bi-pencil"></i> Edit
       </button>
-      <button class="btn btn-sm btn-outline-danger" onclick="deleteWorkout('${log.id}')">
+      <button class="btn btn-outline-danger btn-sm" onclick="deleteWorkout('${log.id}')">
         <i class="bi bi-trash"></i> Delete
       </button>
     </div>
   `;
+  
+  // Add workout duration if available
+  if (log.duration !== undefined) {
+    details += `<div class="mb-3"><small class="text-muted"><i class="bi bi-stopwatch"></i> Duration: ${log.duration} minutes</small></div>`;
+  }
   
   log.exercises.forEach(exercise => {
     if (exercise.sets.length > 0) {
@@ -381,8 +493,8 @@ function editWorkout(workoutId) {
     return;
   }
   
-  // Hide logs and show edit form
-  logsSection.style.display = "none";
+  // Switch to workout view
+  showWorkoutView();
   
   // Set the day selector to the workout's day
   daySelect.value = workout.day;
@@ -394,22 +506,21 @@ function editWorkout(workoutId) {
   populateEditForm(workout);
   
   // Change save button to update mode
-  saveBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Update Workout';
+  saveBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Update';
   saveBtn.onclick = () => updateWorkout(workoutId);
   
   // Add cancel button functionality
   const cancelBtn = document.createElement('button');
-  cancelBtn.className = 'btn btn-secondary ms-2';
+  cancelBtn.className = 'btn btn-secondary';
   cancelBtn.innerHTML = '<i class="bi bi-x-circle"></i> Cancel';
   cancelBtn.onclick = () => {
     if (confirm('Cancel editing? Any unsaved changes will be lost.')) {
       resetEditMode();
-      // Show logs again
-      logsSection.style.display = "block";
-      displayLogs();
+      // Show history view
+      showHistoryView();
     }
   };
-  saveBtn.parentNode.insertBefore(cancelBtn, saveBtn.nextSibling);
+  stickyActionBar.appendChild(cancelBtn);
   
   // Scroll to top
   window.scrollTo(0, 0);
@@ -501,8 +612,7 @@ function updateWorkout(workoutId) {
   resetEditMode();
   
   // Show the updated logs
-  logsSection.style.display = "block";
-  displayLogs();
+  showHistoryView();
 }
 
 /**
@@ -511,15 +621,113 @@ function updateWorkout(workoutId) {
 function resetEditMode() {
   exerciseList.innerHTML = "";
   daySelect.value = "";
-  saveBtn.innerHTML = '<i class="bi bi-save"></i> Save Workout';
+  saveBtn.innerHTML = '<i class="bi bi-save"></i> Save';
   saveBtn.onclick = saveWorkout;
   
   // Remove cancel button if it exists
-  const cancelBtn = saveBtn.nextElementSibling;
+  const cancelBtn = stickyActionBar.querySelector('button:last-child');
   if (cancelBtn && cancelBtn.innerHTML.includes('Cancel')) {
     cancelBtn.remove();
   }
+  
+  // Hide sticky action bar
+  stickyActionBar.style.display = "none";
+  
+  // Reset timer
+  resetTimer();
 }
 
 // Initialize the app when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', initApp);
+
+/**
+ * Timer Functions
+ */
+
+/**
+ * Toggle workout timer on/off
+ */
+function toggleTimer() {
+  if (isTimerRunning) {
+    pauseTimer();
+  } else {
+    startTimer();
+  }
+}
+
+/**
+ * Start the workout timer
+ */
+function startTimer() {
+  if (!isTimerRunning) {
+    timerStartTime = Date.now() - totalElapsedTime;
+    isTimerRunning = true;
+    
+    // Update button appearance
+    timerToggle.innerHTML = '<i class="bi bi-pause-fill"></i>';
+    timerToggle.classList.add('active');
+    
+    // Start the interval
+    timerInterval = setInterval(updateTimerDisplay, 1000);
+  }
+}
+
+/**
+ * Pause the workout timer
+ */
+function pauseTimer() {
+  if (isTimerRunning) {
+    isTimerRunning = false;
+    totalElapsedTime = Date.now() - timerStartTime;
+    
+    // Update button appearance
+    timerToggle.innerHTML = '<i class="bi bi-play-fill"></i>';
+    timerToggle.classList.remove('active');
+    
+    // Clear the interval
+    clearInterval(timerInterval);
+  }
+}
+
+/**
+ * Reset the workout timer
+ */
+function resetTimer() {
+  isTimerRunning = false;
+  totalElapsedTime = 0;
+  timerStartTime = null;
+  
+  // Update button appearance
+  timerToggle.innerHTML = '<i class="bi bi-play-fill"></i>';
+  timerToggle.classList.remove('active');
+  
+  // Clear the interval
+  clearInterval(timerInterval);
+  
+  // Reset display
+  workoutTimer.textContent = "00:00";
+}
+
+/**
+ * Update the timer display
+ */
+function updateTimerDisplay() {
+  if (isTimerRunning) {
+    const elapsed = Date.now() - timerStartTime;
+    const minutes = Math.floor(elapsed / 60000);
+    const seconds = Math.floor((elapsed % 60000) / 1000);
+    
+    workoutTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+}
+
+/**
+ * Get current workout duration in minutes
+ */
+function getWorkoutDuration() {
+  if (isTimerRunning) {
+    return Math.round((Date.now() - timerStartTime) / 60000);
+  } else {
+    return Math.round(totalElapsedTime / 60000);
+  }
+}
