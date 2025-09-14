@@ -15,6 +15,7 @@ const exportBtn = document.getElementById("exportBtn");
 const importBtn = document.getElementById("importBtn");
 const importFile = document.getElementById("importFile");
 const clearBtn = document.getElementById("clearBtn");
+const cancelBtn = document.getElementById("cancelBtn");
 
 // Navigation elements
 const workoutTab = document.getElementById("workoutTab");
@@ -137,6 +138,21 @@ function setupEventListeners() {
   
   // Timer listeners
   timerToggle.addEventListener("click", toggleTimer);
+  
+  // Cancel workout functionality
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", () => {
+      if (confirm("Are you sure you want to cancel this workout? All unsaved progress will be lost.")) {
+        // Reset the form and timer
+        daySelect.value = "";
+        exerciseList.innerHTML = "";
+        totalElapsedTime = 0;
+        updateTimerDisplay(0);
+        stickyActionBar.style.display = "none";
+        alert("Workout session canceled.");
+      }
+    });
+  }
   
   // Close more menu when clicking outside
   document.addEventListener("click", (e) => {
