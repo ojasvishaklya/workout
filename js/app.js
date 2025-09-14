@@ -248,6 +248,18 @@ function displayLogs() {
 function generateLogDetails(log) {
   let details = '';
   
+  // Add action buttons at the top
+  details += `
+    <div class="d-flex justify-content-end mb-3">
+      <button class="btn btn-sm btn-outline-primary me-2" onclick="editWorkout('${log.id}')">
+        <i class="bi bi-pencil"></i> Edit
+      </button>
+      <button class="btn btn-sm btn-outline-danger" onclick="deleteWorkout('${log.id}')">
+        <i class="bi bi-trash"></i> Delete
+      </button>
+    </div>
+  `;
+  
   log.exercises.forEach(exercise => {
     if (exercise.sets.length > 0) {
       details += `<div class="mb-3">
@@ -333,6 +345,179 @@ function clearData() {
     if (logsSection.style.display !== "none") {
       displayLogs();
     }
+  }
+}
+
+/**
+ * Delete a specific workout from history
+ * @param {string} workoutId - ID of the workout to delete
+ */
+function deleteWorkout(workoutId) {
+  if (!confirm("Are you sure you want to delete this workout? This cannot be undone!")) {
+    return;
+  }
+  
+  const logs = JSON.parse(localStorage.getItem("workoutLogs") || "[]");
+  const updatedLogs = logs.filter(log => log.id.toString() !== workoutId.toString());
+  
+  localStorage.setItem("workoutLogs", JSON.stringify(updatedLogs));
+  
+  // Refresh the logs display
+  displayLogs();
+  
+  alert("Workout deleted successfully!");
+}
+
+/**
+ * Edit a specific workout from history
+ * @param {string} workoutId - ID of the workout to edit
+ */
+function editWorkout(workoutId) {
+  const logs = JSON.parse(localStorage.getItem("workoutLogs") || "[]");
+  const workout = logs.find(log => log.id.toString() === workoutId.toString());
+  
+  if (!workout) {
+    alert("Workout not found!");
+    return;
+  }
+  
+  // Hide logs and show edit form
+  logsSection.style.display = "none";
+  
+  // Set the day selector to the workout's day
+  daySelect.value = workout.day;
+  
+  // Load the exercises for that day
+  loadExercises();
+  
+  // Populate the form with existing workout data
+  populateEditForm(workout);
+  
+  // Change save button to update mode
+  saveBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Update Workout';
+  saveBtn.onclick = () => updateWorkout(workoutId);
+  
+  // Add cancel button functionality
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn btn-secondary ms-2';
+  cancelBtn.innerHTML = '<i class="bi bi-x-circle"></i> Cancel';
+  cancelBtn.onclick = () => {
+    if (confirm('Cancel editing? Any unsaved changes will be lost.')) {
+      resetEditMode();
+      // Show logs again
+      logsSection.style.display = "block";
+      displayLogs();
+    }
+  };
+  saveBtn.parentNode.insertBefore(cancelBtn, saveBtn.nextSibling);
+  
+  // Scroll to top
+  window.scrollTo(0, 0);
+}
+
+/**
+ * Populate the exercise form with existing workout data for editing
+ * @param {Object} workout - The workout data to edit
+ */
+function populateEditForm(workout) {
+  workout.exercises.forEach((exercise, exerciseIndex) => {
+    const exerciseElement = document.querySelector(`[data-exercise="${exerciseIndex}"]`);
+    if (!exerciseElement) return;
+    
+    const setInputs = exerciseElement.querySelectorAll('.set-input');
+    exercise.sets.forEach((set, setIndex) => {
+      if (setInputs[setIndex]) {
+        const weightInput = setInputs[setIndex].querySelector('.weight');
+        const repsInput = setInputs[setIndex].querySelector('.reps');
+        
+        if (weightInput) weightInput.value = set.weight || '';
+        if (repsInput) repsInput.value = set.reps || '';
+      }
+    });
+  });
+}
+
+/**
+ * Update an existing workout with new data
+ * @param {string} workoutId - ID of the workout to update
+ */
+function updateWorkout(workoutId) {
+  const day = daySelect.value;
+  if (!day) return alert("Please select a workout day!");
+
+  let hasData = false;
+  const logs = JSON.parse(localStorage.getItem("workoutLogs") || "[]");
+  const workoutIndex = logs.findIndex(log => log.id.toString() === workoutId.toString());
+  
+  if (workoutIndex === -1) {
+    alert("Workout not found!");
+    return;
+  }
+
+  // Update the existing workout entry
+  const updatedWorkout = logs[workoutIndex];
+  updatedWorkout.exercises = [];
+
+  // Collect updated exercise data
+  routine[day].forEach((ex, index) => {
+    const exerciseData = {
+      name: ex.name,
+      sets: []
+    };
+    
+    const setElements = document.querySelectorAll(`[data-exercise="${index}"] .set-input`);
+    setElements.forEach((setElement, setIndex) => {
+      const weight = setElement.querySelector(".weight").value;
+      const reps = setElement.querySelector(".reps").value;
+      
+      exerciseData.sets.push({
+        setNum: setIndex + 1,
+        weight: weight ? parseFloat(weight) : 0,
+        reps: reps ? parseInt(reps) : 0
+      });
+      
+      if (weight || reps) {
+        hasData = true;
+      }
+    });
+    
+    updatedWorkout.exercises.push(exerciseData);
+  });
+
+  // Warn if no data was entered
+  if (!hasData) {
+    if (!confirm("No weight or rep data was entered. Update anyway?")) {
+      return;
+    }
+  }
+
+  // Save updated logs
+  localStorage.setItem("workoutLogs", JSON.stringify(logs));
+
+  // Show success message
+  alert(`Workout updated successfully!\n\nDay: ${day}\nDate: ${new Date(updatedWorkout.date).toLocaleDateString()}`);
+  
+  // Reset the form and button
+  resetEditMode();
+  
+  // Show the updated logs
+  logsSection.style.display = "block";
+  displayLogs();
+}
+
+/**
+ * Reset the form from edit mode back to normal mode
+ */
+function resetEditMode() {
+  exerciseList.innerHTML = "";
+  daySelect.value = "";
+  saveBtn.innerHTML = '<i class="bi bi-save"></i> Save Workout';
+  saveBtn.onclick = saveWorkout;
+  
+  // Remove cancel button if it exists
+  const cancelBtn = saveBtn.nextElementSibling;
+  if (cancelBtn && cancelBtn.innerHTML.includes('Cancel')) {
+    cancelBtn.remove();
   }
 }
 
