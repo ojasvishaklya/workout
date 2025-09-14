@@ -143,6 +143,19 @@ Potential features for future development:
 - **Progressive overload suggestions**: AI-assisted weight progression
 - **Personal records**: Track and celebrate new personal bests
 
+### Recent Updates
+
+The Workout Tracker App has undergone significant updates to enhance user experience and functionality:
+
+- **Routine Management**: Removed hardcoded routines from HTML; routines are now managed centrally in `js/routines.js`.
+- **Edit/Delete History**: Added functionality to edit and delete historic workout logs.
+- **Mobile-First Design**: Redesigned the UI for a mobile-friendly experience, including a sticky save button and running timer.
+- **Navigation Fixes**: Addressed bottom navigation overlap issues; main content is now scrollable above the fixed bottom navigation.
+- **Header Removal**: Simplified the interface by removing the app header.
+- **PWA Support**: Added a manifest and icons for Android home screen integration.
+- **Prepopulate Forms**: Workout forms now prepopulate with the last log for the selected workout type.
+- **Robustness Improvements**: Enhanced error handling, memory management, and data matching logic for a smoother experience.
+
 ## License
 
 MIT License - Feel free to use, modify, and distribute this code.
