@@ -5,7 +5,7 @@
  * and managing workout history.
  */
 
-// DOM elements
+// DOM elements with null checks
 const daySelect = document.getElementById("daySelect");
 const exerciseList = document.getElementById("exerciseList");
 const saveBtn = document.getElementById("saveBtn");
@@ -28,20 +28,72 @@ const stickyActionBar = document.getElementById("stickyActionBar");
 const workoutTimer = document.getElementById("workoutTimer");
 const timerToggle = document.getElementById("timerToggle");
 
+// Check for missing critical DOM elements
+function checkRequiredElements() {
+  const requiredElements = [
+    { element: daySelect, name: 'daySelect' },
+    { element: exerciseList, name: 'exerciseList' },
+    { element: saveBtn, name: 'saveBtn' },
+    { element: workoutTab, name: 'workoutTab' },
+    { element: historyTab, name: 'historyTab' },
+    { element: stickyActionBar, name: 'stickyActionBar' },
+    { element: workoutTimer, name: 'workoutTimer' },
+    { element: timerToggle, name: 'timerToggle' }
+  ];
+  
+  const missing = requiredElements.filter(({ element }) => !element);
+  
+  if (missing.length > 0) {
+    const missingNames = missing.map(({ name }) => name).join(', ');
+    console.error('Missing required DOM elements:', missingNames);
+    alert(`Critical Error: Missing HTML elements (${missingNames}). Please check the HTML file.`);
+    return false;
+  }
+  
+  return true;
+}
+
 // Timer state
 let timerStartTime = null;
 let timerInterval = null;
 let isTimerRunning = false;
 let totalElapsedTime = 0;
 
-// Get the current routine from the loaded routines.js
-const currentRoutineId = defaultRoutine;
-const routine = workoutRoutines[currentRoutineId];
+// Get the current routine from the loaded routines.js with error handling
+let currentRoutineId;
+let routine;
+
+try {
+  if (typeof workoutRoutines === 'undefined' || typeof defaultRoutine === 'undefined') {
+    throw new Error('Workout routines not loaded');
+  }
+  currentRoutineId = defaultRoutine;
+  routine = workoutRoutines[currentRoutineId];
+  
+  if (!routine) {
+    throw new Error(`Routine '${currentRoutineId}' not found`);
+  }
+} catch (error) {
+  console.error('Error loading workout routines:', error);
+  alert('Error: Workout routines failed to load. Please refresh the page.');
+  // Fallback routine
+  currentRoutineId = 'PPL';
+  routine = {
+    "Push A": [{ name: "Basic Push Exercise", sets: 3 }],
+    "Pull A": [{ name: "Basic Pull Exercise", sets: 3 }],
+    "Legs A": [{ name: "Basic Leg Exercise", sets: 3 }]
+  };
+}
 
 /**
  * Initialize the application
  */
 function initApp() {
+  // Check for required DOM elements first
+  if (!checkRequiredElements()) {
+    return; // Stop initialization if critical elements are missing
+  }
+  
   // Populate day selector based on available workout days
   populateDaySelector();
   
@@ -133,8 +185,11 @@ function loadExercises() {
     const card = document.createElement("div");
     card.classList.add("exercise-card");
     
+    // Get exercise data by name instead of index for safety
+    const exerciseData = getExerciseDataByName(lastWorkoutData, ex.name);
+    
     // Check if we have previous data for this exercise
-    const hasLastData = lastWorkoutData && lastWorkoutData.exercises[index] && lastWorkoutData.exercises[index].sets.some(set => set.weight > 0 || set.reps > 0);
+    const hasLastData = exerciseData && exerciseData.sets && exerciseData.sets.some(set => set.weight > 0 || set.reps > 0);
     const lastDataIndicator = hasLastData ? '<small class="text-primary"><i class="bi bi-clock-history"></i> Previous data loaded</small>' : '';
     
     card.innerHTML = `
@@ -144,7 +199,7 @@ function loadExercises() {
       </div>
       <div class="exercise-body">
         <div class="exercise-sets" data-exercise="${index}">
-          ${generateSetInputs(ex.sets, index, lastWorkoutData ? lastWorkoutData.exercises[index] : null)}
+          ${generateSetInputs(ex.sets, index, exerciseData)}
         </div>
       </div>
     `;
@@ -194,6 +249,20 @@ function getLastWorkoutData(workoutDay) {
   const lastWorkout = logs.find(log => log.day === workoutDay);
   
   return lastWorkout || null;
+}
+
+/**
+ * Get exercise data from last workout by exercise name (safer than index)
+ * @param {Object} lastWorkoutData - Last workout data
+ * @param {string} exerciseName - Name of the exercise to find
+ * @returns {Object|null} Exercise data or null if not found
+ */
+function getExerciseDataByName(lastWorkoutData, exerciseName) {
+  if (!lastWorkoutData || !lastWorkoutData.exercises) {
+    return null;
+  }
+  
+  return lastWorkoutData.exercises.find(ex => ex.name === exerciseName) || null;
 }
 
 /**
@@ -584,9 +653,13 @@ function editWorkout(workoutId) {
  * @param {Object} workout - The workout data to edit
  */
 function populateEditForm(workout) {
+  if (!workout || !workout.exercises) {
+    return;
+  }
+  
   workout.exercises.forEach((exercise, exerciseIndex) => {
     const exerciseElement = document.querySelector(`[data-exercise="${exerciseIndex}"]`);
-    if (!exerciseElement) return;
+    if (!exerciseElement || !exercise.sets) return;
     
     const setInputs = exerciseElement.querySelectorAll('.set-input');
     exercise.sets.forEach((set, setIndex) => {
@@ -693,6 +766,14 @@ function resetEditMode() {
 // Initialize the app when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', initApp);
 
+// Cleanup timer when page unloads to prevent memory leaks
+window.addEventListener('beforeunload', () => {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+});
+
 /**
  * Timer Functions
  */
@@ -712,7 +793,12 @@ function toggleTimer() {
  * Start the workout timer
  */
 function startTimer() {
-  if (!isTimerRunning) {
+  if (!isTimerRunning && timerToggle && workoutTimer) {
+    // Clear any existing interval first
+    if (timerInterval) {
+      clearInterval(timerInterval);
+    }
+    
     timerStartTime = Date.now() - totalElapsedTime;
     isTimerRunning = true;
     
@@ -729,7 +815,7 @@ function startTimer() {
  * Pause the workout timer
  */
 function pauseTimer() {
-  if (isTimerRunning) {
+  if (isTimerRunning && timerToggle) {
     isTimerRunning = false;
     totalElapsedTime = Date.now() - timerStartTime;
     
@@ -738,7 +824,10 @@ function pauseTimer() {
     timerToggle.classList.remove('active');
     
     // Clear the interval
-    clearInterval(timerInterval);
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
   }
 }
 
@@ -746,26 +835,33 @@ function pauseTimer() {
  * Reset the workout timer
  */
 function resetTimer() {
+  // Clear any existing interval first to prevent memory leaks
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  
   isTimerRunning = false;
   totalElapsedTime = 0;
   timerStartTime = null;
   
-  // Update button appearance
-  timerToggle.innerHTML = '<i class="bi bi-play-fill"></i>';
-  timerToggle.classList.remove('active');
+  // Update button appearance safely
+  if (timerToggle) {
+    timerToggle.innerHTML = '<i class="bi bi-play-fill"></i>';
+    timerToggle.classList.remove('active');
+  }
   
-  // Clear the interval
-  clearInterval(timerInterval);
-  
-  // Reset display
-  workoutTimer.textContent = "00:00";
+  // Reset display safely
+  if (workoutTimer) {
+    workoutTimer.textContent = "00:00";
+  }
 }
 
 /**
  * Update the timer display
  */
 function updateTimerDisplay() {
-  if (isTimerRunning) {
+  if (isTimerRunning && workoutTimer) {
     const elapsed = Date.now() - timerStartTime;
     const minutes = Math.floor(elapsed / 60000);
     const seconds = Math.floor((elapsed % 60000) / 1000);
