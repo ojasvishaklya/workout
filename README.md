@@ -2,7 +2,7 @@
 
 A simple, mobile-friendly web application for tracking your workouts with a focus on weight and rep progress.
 
-![Workout Tracker](https://placehold.co/600x400?text=Workout+Tracker&font=roboto)
+![Workout Tracker](icons/dumbbell-icon.png)
 
 ## Overview
 
