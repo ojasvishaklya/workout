@@ -1,0 +1,69 @@
+/* Main Styles */
+body { 
+  background: #f8f9fa; 
+  padding-bottom: 2rem;
+}
+
+.container { 
+  margin-top: 20px; 
+  max-width: 100%;
+  padding: 0 15px;
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 720px;
+  }
+}
+
+/* Exercise Input Styles */
+.set-input {
+  display: flex;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.set-input span {
+  width: 60px;
+  text-align: left;
+  margin-right: 5px;
+}
+
+.set-input input {
+  width: 70px;
+  margin-right: 8px;
+}
+
+/* Card and UI Elements */
+.card {
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+  background-color: #f1f5f9;
+}
+
+.sticky-top {
+  top: 10px;
+  z-index: 1020;
+}
+
+.log-item {
+  cursor: pointer;
+}
+
+.exercise-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.btn-group-sm .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.workout-date {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
