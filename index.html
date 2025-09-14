@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Workout Tracker</title>
+  <!-- Favicon and PWA Manifest -->
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="manifest" href="manifest.json">
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <!-- Bootstrap CSS -->
@@ -39,6 +42,9 @@
         <option value="">Select your workout day</option>
         <!-- Days will be populated from JS -->
       </select>
+      <small class="text-muted mt-2" id="helpText" style="display: none;">
+        <i class="bi bi-info-circle"></i> Previous workout data shown in placeholders. Double-click to fill last values.
+      </small>
     </div>
 
     <!-- Exercise List -->

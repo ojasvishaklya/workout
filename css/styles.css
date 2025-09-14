@@ -220,6 +220,18 @@ body {
 
 .set-input input::placeholder {
   color: var(--on-surface-variant);
+  font-size: 14px;
+}
+
+/* Enhanced placeholder for last workout data */
+.set-input input[data-last]:not([data-last=""]):placeholder-shown {
+  background: rgba(25, 118, 210, 0.05);
+  border-color: rgba(25, 118, 210, 0.3);
+}
+
+.set-input input[data-last]:not([data-last=""]):placeholder-shown::placeholder {
+  color: var(--primary-color);
+  font-weight: 500;
 }
 
 /* Buttons - Material Design */

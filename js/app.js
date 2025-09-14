@@ -117,17 +117,34 @@ function loadExercises() {
   // Reset timer for new workout
   resetTimer();
 
+  // Get last workout data for prepopulation
+  const lastWorkoutData = getLastWorkoutData(day);
+  
+  // Show help text if we have previous data
+  const helpText = document.getElementById('helpText');
+  if (lastWorkoutData && helpText) {
+    helpText.style.display = 'block';
+  } else if (helpText) {
+    helpText.style.display = 'none';
+  }
+
   // Create exercise cards with new styling
   routine[day].forEach((ex, index) => {
     const card = document.createElement("div");
     card.classList.add("exercise-card");
+    
+    // Check if we have previous data for this exercise
+    const hasLastData = lastWorkoutData && lastWorkoutData.exercises[index] && lastWorkoutData.exercises[index].sets.some(set => set.weight > 0 || set.reps > 0);
+    const lastDataIndicator = hasLastData ? '<small class="text-primary"><i class="bi bi-clock-history"></i> Previous data loaded</small>' : '';
+    
     card.innerHTML = `
       <div class="exercise-header">
         ${ex.name}
+        ${lastDataIndicator}
       </div>
       <div class="exercise-body">
         <div class="exercise-sets" data-exercise="${index}">
-          ${generateSetInputs(ex.sets, index)}
+          ${generateSetInputs(ex.sets, index, lastWorkoutData ? lastWorkoutData.exercises[index] : null)}
         </div>
       </div>
     `;
@@ -139,20 +156,56 @@ function loadExercises() {
  * Generate input fields for tracking sets
  * @param {number} numSets - Number of sets for the exercise
  * @param {number} exerciseIndex - Index of the exercise in the routine
+ * @param {Object} lastExerciseData - Previous workout data for this exercise
  * @returns {string} HTML for set input fields
  */
-function generateSetInputs(numSets, exerciseIndex) {
+function generateSetInputs(numSets, exerciseIndex, lastExerciseData) {
   let inputs = '';
   for (let i = 1; i <= numSets; i++) {
+    // Get previous set data if available
+    const lastSet = lastExerciseData && lastExerciseData.sets && lastExerciseData.sets[i - 1];
+    const lastWeight = lastSet ? lastSet.weight : '';
+    const lastReps = lastSet ? lastSet.reps : '';
+    
+    // Create placeholder text showing previous values
+    const weightPlaceholder = lastWeight ? `${lastWeight} kg (last)` : 'kg';
+    const repsPlaceholder = lastReps ? `${lastReps} reps (last)` : 'reps';
+    
     inputs += `
       <div class="set-input">
         <span>Set ${i}:</span>
-        <input type="number" class="form-control weight" placeholder="kg" min="0" step="0.5">
-        <input type="number" class="form-control reps" placeholder="reps" min="0">
+        <input type="number" class="form-control weight" placeholder="${weightPlaceholder}" min="0" step="0.5" data-last="${lastWeight || ''}" ondblclick="fillLastValue(this)">
+        <input type="number" class="form-control reps" placeholder="${repsPlaceholder}" min="0" data-last="${lastReps || ''}" ondblclick="fillLastValue(this)">
       </div>
     `;
   }
   return inputs;
+}
+
+/**
+ * Get the last workout data for a specific day to prepopulate the form
+ * @param {string} workoutDay - The workout day to find last data for
+ * @returns {Object|null} Last workout data or null if not found
+ */
+function getLastWorkoutData(workoutDay) {
+  const logs = JSON.parse(localStorage.getItem("workoutLogs") || "[]");
+  
+  // Find the most recent workout for this specific day
+  const lastWorkout = logs.find(log => log.day === workoutDay);
+  
+  return lastWorkout || null;
+}
+
+/**
+ * Fill input with last workout value on double-click
+ * @param {HTMLElement} input - The input element that was double-clicked
+ */
+function fillLastValue(input) {
+  const lastValue = input.getAttribute('data-last');
+  if (lastValue && lastValue !== '') {
+    input.value = lastValue;
+    input.focus();
+  }
 }
 
 /**
