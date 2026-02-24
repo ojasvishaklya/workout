@@ -94,13 +94,95 @@ const workoutRoutines = {
     ]
   },
 
-  // You can add more routines here in the future
-  // Example:
-  // "Upper/Lower": {
-  //   "Upper A": [ ... ],
-  //   "Lower A": [ ... ],
-  //   ...
-  // }
+  // Upper/Lower Split Routine (4 days per week)
+  "Upper/Lower": {
+    "Upper A (Horizontal Focus)": [
+      { name: "Flat Barbell Bench Press", sets: 4, muscles: [MuscleGroups.MID_CHEST, MuscleGroups.FRONT_SHOULDERS, MuscleGroups.TRICEPS] },
+      { name: "Bent Over Barbell Row", sets: 4, muscles: [MuscleGroups.UPPER_BACK, MuscleGroups.LATS, MuscleGroups.BICEPS] },
+      { name: "Incline Dumbbell Press", sets: 3, muscles: [MuscleGroups.UPPER_CHEST, MuscleGroups.FRONT_SHOULDERS] },
+      { name: "Seated Cable Row", sets: 3, muscles: [MuscleGroups.UPPER_BACK, MuscleGroups.LATS] },
+      { name: "Dumbbell Lateral Raises", sets: 3, muscles: [MuscleGroups.SIDE_SHOULDERS] },
+      { name: "Dumbbell Bicep Curls", sets: 3, muscles: [MuscleGroups.BICEPS] },
+      { name: "Cable Tricep Pushdowns", sets: 3, muscles: [MuscleGroups.TRICEPS] }
+    ],
+    "Lower A (Quad Focus)": [
+      { name: "Barbell Back Squat", sets: 4, muscles: [MuscleGroups.QUADS, MuscleGroups.GLUTES, MuscleGroups.CORE] },
+      { name: "Romanian Deadlift", sets: 3, muscles: [MuscleGroups.HAMSTRINGS, MuscleGroups.GLUTES, MuscleGroups.LOWER_BACK] },
+      { name: "Leg Press", sets: 3, muscles: [MuscleGroups.QUADS, MuscleGroups.GLUTES] },
+      { name: "Leg Extension", sets: 3, muscles: [MuscleGroups.QUADS] },
+      { name: "Hamstring Curl", sets: 3, muscles: [MuscleGroups.HAMSTRINGS] },
+      { name: "Standing Calf Raises", sets: 4, muscles: [MuscleGroups.CALVES] },
+      { name: "Hanging Leg Raises", sets: 3, muscles: [MuscleGroups.ABS, MuscleGroups.CORE] },
+      { name: "Plank", sets: 3, muscles: [MuscleGroups.CORE] }
+    ],
+    "Upper B (Vertical Focus)": [
+      { name: "Overhead Barbell Press", sets: 4, muscles: [MuscleGroups.FRONT_SHOULDERS, MuscleGroups.SIDE_SHOULDERS, MuscleGroups.TRICEPS] },
+      { name: "Pull-Ups / Lat Pulldown", sets: 4, muscles: [MuscleGroups.LATS, MuscleGroups.UPPER_BACK, MuscleGroups.BICEPS] },
+      { name: "Incline Dumbbell Press", sets: 3, muscles: [MuscleGroups.UPPER_CHEST, MuscleGroups.FRONT_SHOULDERS] },
+      { name: "Single-Arm Dumbbell Row", sets: 3, muscles: [MuscleGroups.LATS, MuscleGroups.UPPER_BACK] },
+      { name: "Dumbbell/Cable Lateral Raises", sets: 3, muscles: [MuscleGroups.SIDE_SHOULDERS] },
+      { name: "Face Pulls", sets: 3, muscles: [MuscleGroups.REAR_SHOULDERS, MuscleGroups.UPPER_BACK] },
+      { name: "Hammer Curls", sets: 3, muscles: [MuscleGroups.BICEPS, MuscleGroups.FOREARMS] },
+      { name: "Overhead Tricep Extension", sets: 3, muscles: [MuscleGroups.TRICEPS] }
+    ],
+    "Lower B (Glute & Hamstring Focus)": [
+      { name: "Hip Thrust", sets: 4, muscles: [MuscleGroups.GLUTES, MuscleGroups.HAMSTRINGS] },
+      { name: "Sumo Deadlift / Conventional Deadlift", sets: 3, muscles: [MuscleGroups.HAMSTRINGS, MuscleGroups.GLUTES, MuscleGroups.LOWER_BACK] },
+      { name: "Bulgarian Split Squats", sets: 3, muscles: [MuscleGroups.QUADS, MuscleGroups.GLUTES] },
+      { name: "Walking Lunges", sets: 3, muscles: [MuscleGroups.QUADS, MuscleGroups.GLUTES, MuscleGroups.HAMSTRINGS] },
+      { name: "Hamstring Curl (Lying or Seated)", sets: 3, muscles: [MuscleGroups.HAMSTRINGS] },
+      { name: "Cable Glute Kickbacks", sets: 3, muscles: [MuscleGroups.GLUTES] },
+      { name: "Seated Calf Raises", sets: 4, muscles: [MuscleGroups.CALVES] },
+      { name: "Weighted Crunches", sets: 3, muscles: [MuscleGroups.ABS] }
+    ]
+  },
+
+  // 5-Day Split Routine
+  "5-Day Split": {
+    "Upper Body Strength": [
+      { name: "Bench Press", sets: 4, muscles: [MuscleGroups.MID_CHEST, MuscleGroups.FRONT_SHOULDERS, MuscleGroups.TRICEPS] },
+      { name: "Barbell Row", sets: 4, muscles: [MuscleGroups.UPPER_BACK, MuscleGroups.LATS, MuscleGroups.BICEPS] },
+      { name: "Overhead Press", sets: 3, muscles: [MuscleGroups.FRONT_SHOULDERS, MuscleGroups.SIDE_SHOULDERS, MuscleGroups.TRICEPS] },
+      { name: "Lat Pulldown", sets: 3, muscles: [MuscleGroups.LATS, MuscleGroups.BICEPS] },
+      { name: "Dumbbell Lateral Raises", sets: 3, muscles: [MuscleGroups.SIDE_SHOULDERS] },
+      { name: "Face Pulls", sets: 3, muscles: [MuscleGroups.REAR_SHOULDERS, MuscleGroups.UPPER_BACK] }
+    ],
+    "Lower Body Strength": [
+      { name: "Barbell Back Squat", sets: 4, muscles: [MuscleGroups.QUADS, MuscleGroups.GLUTES, MuscleGroups.CORE] },
+      { name: "Romanian Deadlift", sets: 3, muscles: [MuscleGroups.HAMSTRINGS, MuscleGroups.GLUTES, MuscleGroups.LOWER_BACK] },
+      { name: "Bulgarian Split Squats", sets: 3, muscles: [MuscleGroups.QUADS, MuscleGroups.GLUTES] },
+      { name: "Leg Curl", sets: 3, muscles: [MuscleGroups.HAMSTRINGS] },
+      { name: "Standing Calf Raises", sets: 4, muscles: [MuscleGroups.CALVES] },
+      { name: "Plank", sets: 3, muscles: [MuscleGroups.CORE, MuscleGroups.ABS] }
+    ],
+    "Push Day": [
+      { name: "Incline Dumbbell Press", sets: 3, muscles: [MuscleGroups.UPPER_CHEST, MuscleGroups.FRONT_SHOULDERS] },
+      { name: "Dumbbell Shoulder Press", sets: 3, muscles: [MuscleGroups.FRONT_SHOULDERS, MuscleGroups.SIDE_SHOULDERS] },
+      { name: "Cable Chest Fly", sets: 3, muscles: [MuscleGroups.MID_CHEST] },
+      { name: "Dumbbell/Cable Lateral Raises", sets: 4, muscles: [MuscleGroups.SIDE_SHOULDERS] },
+      { name: "Overhead Tricep Extension", sets: 3, muscles: [MuscleGroups.TRICEPS] },
+      { name: "Tricep Pushdowns", sets: 3, muscles: [MuscleGroups.TRICEPS] }
+    ],
+    "Pull Day": [
+      { name: "Pull-Ups / Assisted Pull-Ups", sets: 4, muscles: [MuscleGroups.LATS, MuscleGroups.UPPER_BACK, MuscleGroups.BICEPS] },
+      { name: "Seated Cable Row", sets: 3, muscles: [MuscleGroups.UPPER_BACK, MuscleGroups.LATS] },
+      { name: "Single-Arm Dumbbell Row", sets: 3, muscles: [MuscleGroups.LATS, MuscleGroups.UPPER_BACK] },
+      { name: "Reverse Fly / Rear Delt Fly", sets: 3, muscles: [MuscleGroups.REAR_SHOULDERS, MuscleGroups.UPPER_BACK] },
+      { name: "Barbell Curls", sets: 3, muscles: [MuscleGroups.BICEPS] },
+      { name: "Hammer Curls", sets: 3, muscles: [MuscleGroups.BICEPS, MuscleGroups.FOREARMS] },
+      { name: "Hyperextensions", sets: 3, muscles: [MuscleGroups.LOWER_BACK, MuscleGroups.GLUTES] }
+    ],
+    "Legs (Glute Focus)": [
+      { name: "Hip Thrust", sets: 4, muscles: [MuscleGroups.GLUTES, MuscleGroups.HAMSTRINGS] },
+      { name: "Leg Press", sets: 3, muscles: [MuscleGroups.QUADS, MuscleGroups.GLUTES] },
+      { name: "Walking Lunges", sets: 3, muscles: [MuscleGroups.QUADS, MuscleGroups.GLUTES, MuscleGroups.HAMSTRINGS] },
+      { name: "Leg Extension", sets: 3, muscles: [MuscleGroups.QUADS] },
+      { name: "Hamstring Curl", sets: 3, muscles: [MuscleGroups.HAMSTRINGS] },
+      { name: "Cable Kickbacks / Glute Kickbacks", sets: 3, muscles: [MuscleGroups.GLUTES] },
+      { name: "Seated Calf Raises", sets: 4, muscles: [MuscleGroups.CALVES] },
+      { name: "Weighted Crunches", sets: 3, muscles: [MuscleGroups.ABS] }
+    ]
+  }
 };
 
 // Default routine to use in the app

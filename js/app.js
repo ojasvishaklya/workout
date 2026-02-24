@@ -6,6 +6,7 @@
  */
 
 // DOM elements with null checks
+const routineSelect = document.getElementById("routineSelect");
 const daySelect = document.getElementById("daySelect");
 const exerciseList = document.getElementById("exerciseList");
 const saveBtn = document.getElementById("saveBtn");
@@ -19,10 +20,16 @@ const cancelBtn = document.getElementById("cancelBtn");
 
 // Navigation elements
 const workoutTab = document.getElementById("workoutTab");
+const scheduleTab = document.getElementById("scheduleTab");
 const historyTab = document.getElementById("historyTab");
 const moreTab = document.getElementById("moreTab");
 const moreMenu = document.getElementById("moreMenu");
 const mainContent = document.querySelector(".main-content");
+
+// Schedule elements
+const scheduleSection = document.getElementById("scheduleSection");
+const scheduleContent = document.getElementById("scheduleContent");
+const scheduleRoutineSelect = document.getElementById("scheduleRoutineSelect");
 
 // Timer elements
 const stickyActionBar = document.getElementById("stickyActionBar");
@@ -32,6 +39,7 @@ const timerToggle = document.getElementById("timerToggle");
 // Check for missing critical DOM elements
 function checkRequiredElements() {
   const requiredElements = [
+    { element: routineSelect, name: 'routineSelect' },
     { element: daySelect, name: 'daySelect' },
     { element: exerciseList, name: 'exerciseList' },
     { element: saveBtn, name: 'saveBtn' },
@@ -41,16 +49,16 @@ function checkRequiredElements() {
     { element: workoutTimer, name: 'workoutTimer' },
     { element: timerToggle, name: 'timerToggle' }
   ];
-  
+
   const missing = requiredElements.filter(({ element }) => !element);
-  
+
   if (missing.length > 0) {
     const missingNames = missing.map(({ name }) => name).join(', ');
     console.error('Missing required DOM elements:', missingNames);
     alert(`Critical Error: Missing HTML elements (${missingNames}). Please check the HTML file.`);
     return false;
   }
-  
+
   return true;
 }
 
@@ -64,18 +72,50 @@ let totalElapsedTime = 0;
 let currentRoutineId;
 let routine;
 
+/**
+ * Load a routine by ID
+ * @param {string} routineId - The ID of the routine to load
+ */
+function loadRoutine(routineId) {
+  try {
+    if (typeof workoutRoutines === 'undefined') {
+      throw new Error('Workout routines not loaded');
+    }
+
+    const selectedRoutine = workoutRoutines[routineId];
+
+    if (!selectedRoutine) {
+      throw new Error(`Routine '${routineId}' not found`);
+    }
+
+    currentRoutineId = routineId;
+    routine = selectedRoutine;
+
+    // Save to localStorage
+    localStorage.setItem('selectedRoutine', routineId);
+
+    return true;
+  } catch (error) {
+    console.error('Error loading workout routine:', error);
+    return false;
+  }
+}
+
+// Initialize routine from localStorage or default
 try {
   if (typeof workoutRoutines === 'undefined' || typeof defaultRoutine === 'undefined') {
     throw new Error('Workout routines not loaded');
   }
-  currentRoutineId = defaultRoutine;
-  routine = workoutRoutines[currentRoutineId];
-  
-  if (!routine) {
-    throw new Error(`Routine '${currentRoutineId}' not found`);
+
+  // Try to load saved routine from localStorage
+  const savedRoutine = localStorage.getItem('selectedRoutine');
+  const routineToLoad = savedRoutine && workoutRoutines[savedRoutine] ? savedRoutine : defaultRoutine;
+
+  if (!loadRoutine(routineToLoad)) {
+    throw new Error('Failed to load routine');
   }
 } catch (error) {
-  console.error('Error loading workout routines:', error);
+  console.error('Error initializing workout routines:', error);
   alert('Error: Workout routines failed to load. Please refresh the page.');
   // Fallback routine
   currentRoutineId = 'PPL';
@@ -94,12 +134,76 @@ function initApp() {
   if (!checkRequiredElements()) {
     return; // Stop initialization if critical elements are missing
   }
-  
+
+  // Populate routine selector with available routines
+  populateRoutineSelector();
+
   // Populate day selector based on available workout days
   populateDaySelector();
-  
+
   // Set up event listeners
   setupEventListeners();
+}
+
+/**
+ * Populate the routine selector dropdown with available routines
+ */
+function populateRoutineSelector() {
+  if (!routineSelect) return;
+
+  // Clear existing options
+  routineSelect.innerHTML = '';
+
+  // Add routine options
+  Object.keys(workoutRoutines).forEach(routineId => {
+    const option = document.createElement('option');
+    option.textContent = routineId;
+    option.value = routineId;
+
+    if (routineId === currentRoutineId) {
+      option.selected = true;
+    }
+
+    routineSelect.appendChild(option);
+  });
+}
+
+/**
+ * Handle routine change event
+ */
+function handleRoutineChange() {
+  const newRoutineId = routineSelect.value;
+
+  if (!newRoutineId) return;
+
+  // Check if there's unsaved work
+  if (daySelect.value && exerciseList.children.length > 0) {
+    const hasUnsavedData = Array.from(document.querySelectorAll('.set-input input'))
+      .some(input => input.value !== '');
+
+    if (hasUnsavedData) {
+      if (!confirm('Switching routines will clear your current workout. Continue?')) {
+        // Revert to previous routine
+        routineSelect.value = currentRoutineId;
+        return;
+      }
+    }
+  }
+
+  // Load the new routine
+  if (loadRoutine(newRoutineId)) {
+    // Clear current workout
+    daySelect.value = '';
+    exerciseList.innerHTML = '';
+    stickyActionBar.style.display = 'none';
+    resetTimer();
+
+    // Repopulate day selector with new routine's days
+    populateDaySelector();
+  } else {
+    alert('Failed to load routine. Please try again.');
+    routineSelect.value = currentRoutineId;
+  }
 }
 
 /**
@@ -110,7 +214,7 @@ function populateDaySelector() {
   const firstOption = daySelect.options[0];
   daySelect.innerHTML = '';
   daySelect.appendChild(firstOption);
-  
+
   // Add workout days as options
   Object.keys(routine).forEach(day => {
     const option = document.createElement('option');
@@ -124,18 +228,29 @@ function populateDaySelector() {
  * Set up event listeners for UI interactions
  */
 function setupEventListeners() {
+  // Routine selector listener
+  if (routineSelect) {
+    routineSelect.addEventListener("change", handleRoutineChange);
+  }
+
   daySelect.addEventListener("change", loadExercises);
   saveBtn.addEventListener("click", saveWorkout);
   exportBtn.addEventListener("click", exportData);
   importBtn.addEventListener("click", () => importFile.click());
   importFile.addEventListener("change", importData);
   clearBtn.addEventListener("click", clearData);
-  
+
   // Navigation listeners
   workoutTab.addEventListener("click", showWorkoutView);
+  scheduleTab.addEventListener("click", showScheduleView);
   historyTab.addEventListener("click", showHistoryView);
   moreTab.addEventListener("click", toggleMoreMenu);
-  
+
+  // Schedule routine selector listener
+  if (scheduleRoutineSelect) {
+    scheduleRoutineSelect.addEventListener("change", displaySchedule);
+  }
+
   // Timer listeners
   timerToggle.addEventListener("click", toggleTimer);
   
@@ -391,18 +506,56 @@ function toggleLogs() {
 function showWorkoutView() {
   // Update navigation
   setActiveTab(workoutTab);
-  
+
   // Show/hide sections
+  scheduleSection.style.display = "none";
   logsSection.style.display = "none";
-  
+
+  // Show routine selector
+  if (routineSelect && routineSelect.parentElement) {
+    routineSelect.parentElement.style.display = "block";
+  }
+
   // Show day selector
   daySelect.parentElement.style.display = "block";
-  
+
   // Show sticky action bar if day is selected
   if (daySelect.value) {
     stickyActionBar.style.display = "flex";
   }
-  
+
+  // Close more menu
+  moreMenu.style.display = "none";
+}
+
+/**
+ * Show schedule view
+ */
+function showScheduleView() {
+  // Update navigation
+  setActiveTab(scheduleTab);
+
+  // Show/hide sections
+  scheduleSection.style.display = "block";
+  logsSection.style.display = "none";
+  stickyActionBar.style.display = "none";
+
+  // Hide routine selector
+  if (routineSelect && routineSelect.parentElement) {
+    routineSelect.parentElement.style.display = "none";
+  }
+
+  // Hide day selector
+  daySelect.parentElement.style.display = "none";
+
+  // Populate schedule routine selector if needed
+  if (scheduleRoutineSelect && scheduleRoutineSelect.options.length === 0) {
+    populateScheduleRoutineSelector();
+  }
+
+  // Display schedule
+  displaySchedule();
+
   // Close more menu
   moreMenu.style.display = "none";
 }
@@ -413,17 +566,23 @@ function showWorkoutView() {
 function showHistoryView() {
   // Update navigation
   setActiveTab(historyTab);
-  
+
   // Show/hide sections
+  scheduleSection.style.display = "none";
   logsSection.style.display = "block";
   stickyActionBar.style.display = "none";
-  
+
+  // Hide routine selector
+  if (routineSelect && routineSelect.parentElement) {
+    routineSelect.parentElement.style.display = "none";
+  }
+
   // Hide day selector
   daySelect.parentElement.style.display = "none";
-  
+
   // Load logs
   displayLogs();
-  
+
   // Close more menu
   moreMenu.style.display = "none";
 }
@@ -441,10 +600,10 @@ function toggleMoreMenu() {
  */
 function setActiveTab(activeTab) {
   // Remove active class from all tabs
-  [workoutTab, historyTab, moreTab].forEach(tab => {
+  [workoutTab, scheduleTab, historyTab, moreTab].forEach(tab => {
     tab.classList.remove("active");
   });
-  
+
   // Add active class to selected tab
   activeTab.classList.add("active");
 }
@@ -773,18 +932,127 @@ function resetEditMode() {
   daySelect.value = "";
   saveBtn.innerHTML = '<i class="bi bi-save"></i> Save';
   saveBtn.onclick = saveWorkout;
-  
+
   // Remove cancel button if it exists
   const cancelBtn = stickyActionBar.querySelector('button:last-child');
   if (cancelBtn && cancelBtn.innerHTML.includes('Cancel')) {
     cancelBtn.remove();
   }
-  
+
   // Hide sticky action bar
   stickyActionBar.style.display = "none";
-  
+
   // Reset timer
   resetTimer();
+}
+
+/**
+ * Populate the schedule routine selector dropdown
+ */
+function populateScheduleRoutineSelector() {
+  if (!scheduleRoutineSelect) return;
+
+  // Clear existing options
+  scheduleRoutineSelect.innerHTML = '';
+
+  // Add routine options
+  Object.keys(workoutRoutines).forEach(routineId => {
+    const option = document.createElement('option');
+    option.textContent = routineId;
+    option.value = routineId;
+
+    if (routineId === currentRoutineId) {
+      option.selected = true;
+    }
+
+    scheduleRoutineSelect.appendChild(option);
+  });
+}
+
+/**
+ * Display the routine schedule
+ */
+function displaySchedule() {
+  if (!scheduleContent || !scheduleRoutineSelect) return;
+
+  const selectedRoutineId = scheduleRoutineSelect.value;
+  const selectedRoutine = workoutRoutines[selectedRoutineId];
+
+  if (!selectedRoutine) {
+    scheduleContent.innerHTML = '<div class="alert alert-info">Routine not found.</div>';
+    return;
+  }
+
+  // Calculate summary stats
+  const days = Object.keys(selectedRoutine);
+  const totalDays = days.length;
+  let totalExercises = 0;
+  let totalSets = 0;
+
+  days.forEach(day => {
+    const exercises = selectedRoutine[day];
+    totalExercises += exercises.length;
+    exercises.forEach(ex => {
+      totalSets += ex.sets;
+    });
+  });
+
+  // Build schedule HTML
+  let html = `
+    <div class="schedule-summary">
+      <div class="schedule-stat">
+        <span class="schedule-stat-value">${totalDays}</span>
+        <span class="schedule-stat-label">Days</span>
+      </div>
+      <div class="schedule-stat">
+        <span class="schedule-stat-value">${totalExercises}</span>
+        <span class="schedule-stat-label">Exercises</span>
+      </div>
+      <div class="schedule-stat">
+        <span class="schedule-stat-value">${totalSets}</span>
+        <span class="schedule-stat-label">Total Sets</span>
+      </div>
+    </div>
+  `;
+
+  // Add each day's schedule
+  days.forEach((day, index) => {
+    const exercises = selectedRoutine[day];
+
+    html += `
+      <div class="schedule-day-card">
+        <div class="schedule-day-header">
+          <i class="bi bi-calendar-day"></i>
+          <span>${day}</span>
+        </div>
+        <div class="schedule-day-body">
+    `;
+
+    exercises.forEach(exercise => {
+      html += `
+        <div class="schedule-exercise">
+          <div style="flex: 1;">
+            <div class="schedule-exercise-name">${exercise.name}</div>
+            ${exercise.muscles ? `
+              <div class="schedule-exercise-muscles">
+                ${exercise.muscles.map(muscle =>
+                  `<span class="schedule-muscle-tag">${muscle}</span>`
+                ).join('')}
+              </div>
+            ` : ''}
+          </div>
+          <div class="schedule-exercise-sets">${exercise.sets} sets</div>
+        </div>
+      `;
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+  });
+
+  scheduleContent.innerHTML = html;
 }
 
 // Initialize the app when the DOM is fully loaded

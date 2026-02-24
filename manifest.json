@@ -3,8 +3,8 @@
   "short_name": "Workout",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#1976d2",
-  "theme_color": "#1976d2",
+  "background_color": "#121212",
+  "theme_color": "#1e1e1e",
   "description": "Track your workouts and progress.",
   "icons": [
     {
