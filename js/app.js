@@ -361,15 +361,11 @@ function generateSetInputs(numSets, exerciseIndex, lastExerciseData) {
     const lastWeight = lastSet ? lastSet.weight : '';
     const lastReps = lastSet ? lastSet.reps : '';
     
-    // Create placeholder text showing previous values
-    const weightPlaceholder = lastWeight ? `${lastWeight} kg (last)` : 'kg';
-    const repsPlaceholder = lastReps ? `${lastReps} reps (last)` : 'reps';
-    
     inputs += `
       <div class="set-input">
         <span>Set ${i}:</span>
-        <input type="number" class="form-control weight" placeholder="${weightPlaceholder}" min="0" step="0.5" data-last="${lastWeight || ''}" ondblclick="fillLastValue(this)">
-        <input type="number" class="form-control reps" placeholder="${repsPlaceholder}" min="0" data-last="${lastReps || ''}" ondblclick="fillLastValue(this)">
+        <input type="number" class="form-control weight" placeholder="kg" min="0" step="0.5" value="${lastWeight}">
+        <input type="number" class="form-control reps" placeholder="reps" min="0" value="${lastReps}">
       </div>
     `;
   }
@@ -404,17 +400,7 @@ function getExerciseDataByName(lastWorkoutData, exerciseName) {
   return lastWorkoutData.exercises.find(ex => ex.name === exerciseName) || null;
 }
 
-/**
- * Fill input with last workout value on double-click
- * @param {HTMLElement} input - The input element that was double-clicked
- */
-function fillLastValue(input) {
-  const lastValue = input.getAttribute('data-last');
-  if (lastValue && lastValue !== '') {
-    input.value = lastValue;
-    input.focus();
-  }
-}
+
 
 /**
  * Save workout data to localStorage
