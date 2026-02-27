@@ -106,13 +106,13 @@ const workoutRoutines = {
       { name: "Cable Tricep Pushdowns", sets: 3, muscles: [MuscleGroups.TRICEPS] }
     ],
     "Lower A (Quad Focus)": [
-      { name: "Barbell Back Squat", sets: 4, muscles: [MuscleGroups.QUADS, MuscleGroups.GLUTES, MuscleGroups.CORE] },
+      { name: "Squats", sets: 4, muscles: [MuscleGroups.QUADS, MuscleGroups.GLUTES, MuscleGroups.CORE] },
       { name: "Romanian Deadlift", sets: 3, muscles: [MuscleGroups.HAMSTRINGS, MuscleGroups.GLUTES, MuscleGroups.LOWER_BACK] },
       { name: "Leg Press", sets: 3, muscles: [MuscleGroups.QUADS, MuscleGroups.GLUTES] },
       { name: "Leg Extension", sets: 3, muscles: [MuscleGroups.QUADS] },
       { name: "Hamstring Curl", sets: 3, muscles: [MuscleGroups.HAMSTRINGS] },
       { name: "Standing Calf Raises", sets: 4, muscles: [MuscleGroups.CALVES] },
-      { name: "Hanging Leg Raises", sets: 3, muscles: [MuscleGroups.ABS, MuscleGroups.CORE] },
+      { name: "Crunches", sets: 3, muscles: [MuscleGroups.ABS, MuscleGroups.CORE] },
       { name: "Plank", sets: 3, muscles: [MuscleGroups.CORE] }
     ],
     "Upper B (Vertical Focus)": [
